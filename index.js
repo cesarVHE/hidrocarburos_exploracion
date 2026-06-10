@@ -1,10 +1,10 @@
 // Inicializar el mapa centrado en México
-var map = L.map("map").setView([24.1, -102], 6);
+// window.map = L.map("map").setView([24.1, -102], 6);
 
 // Capa base CartoDB Positron
-var mapaBase = L.tileLayer("https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-}).addTo(map);
+// var mapaBase = L.tileLayer("https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", {
+//     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+// }).addTo(window.map);
 
 // Paleta de colores alineada a la identidad institucional
 var paletaColores = {
@@ -17,22 +17,21 @@ var paletaColores = {
     "Zona Veracruz": "#987E50"         // Bronce/Ocre oscuro
 };
 
-// MIGRADAS: Rutas relativas locales para GitHub Pages (asumiendo que están en una carpeta llamada 'capas')
+// URLs de GeoServer WFS GeoJSON
 var urlsCapas = {
-    "Provincias Petroleras": "provincias_petroleras.geojson",
-    "Aguas Profundas": "Zona Aguas Profundas.geojson",
-    "Aguas Someras": "Zona Aguas Someras.geojson",
-    "Zona Burgos": "Zona Burgos.geojson",
-    "Cuencas del Sureste": "Zona Cuencas del Sureste.geojson",
-    "Tampico - Misantla": "Zona Tampico-Misantla.geojson",
-    "Zona Veracruz": "Zona Veracruz.geojson",
-    "Provincias petroleras": "provincias_petroleras.geojson"
+    "Provincias Petroleras": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN:provincias_petroleras&outputFormat=application%2Fjson",
+    "Aguas Profundas": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_aguas_profundas_e&outputFormat=application%2Fjson",
+    "Aguas Someras": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_aguas_someras_e&outputFormat=application%2Fjson",
+    "Zona Burgos": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_burgos_e&outputFormat=application%2Fjson",
+    "Cuencas del Sureste": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_cuencas_del_sureste_e&outputFormat=application%2Fjson",
+    "Tampico - Misantla": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_tampico-misantla_e&outputFormat=application%2Fjson",
+    "Zona Veracruz": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_veracruz_e&outputFormat=application%2Fjson"
 };
 
 var gruposCluster = {}; 
 var capasCargadas = {};  
 
-var controlCapas = L.control.layers({"Mapa Base": mapaBase}, {}, { collapsed: false }).addTo(map);
+// var controlCapas = L.control.layers({"Mapa Base": mapaBase}, {}, { collapsed: false }).addTo(window.map);
 
 // Inicializar contenedores de cluster vacíos
 for (var nombreCapa in urlsCapas) {
@@ -53,12 +52,12 @@ for (var nombreCapa in urlsCapas) {
             });
         })(paletaColores[nombreCapa]);
         
-        controlCapas.addOverlay(gruposCluster[nombreCapa], nombreCapa);
+        window.controlCapas.addOverlay(gruposCluster[nombreCapa], nombreCapa);
         capasCargadas[nombreCapa] = false;
     }
 }
 
-// 1. ESTILO Y HOVER PARA CAPAS DE PUNTOS
+// 1. ESTILO Y HOVER PARA CAPAS DE PUNTOS (Pozos, Instalaciones)
 function crearMarcadorCirculo(feature, latlng, nombreCapa) {
     var colorCapa = paletaColores[nombreCapa] || "#000000";
     var opcionesEstiloBase = {
@@ -87,13 +86,13 @@ function crearMarcadorCirculo(feature, latlng, nombreCapa) {
     return marcador;
 }
 
-// 2. ESTILO Y HOVER PARA CAPAS DE POLÍGONOS (Provincias Petroleras)
+// 2. ESTILO Y HOVER PARA CAPAS DE POLÍGONOS (NUEVO: Para Provincias Petroleras)
 function aplicarEstiloPoligono(feature, layer, nombreCapa) {
     var colorCapa = paletaColores[nombreCapa] || "#000000";
     
     var estiloBase = {
         fillColor: colorCapa,
-        fillOpacity: 0.3,
+        fillOpacity: 0.3, // Transparencia elegante para no tapar el fondo
         color: colorCapa,
         weight: 2,
         opacity: 0.8
@@ -101,12 +100,13 @@ function aplicarEstiloPoligono(feature, layer, nombreCapa) {
     
     layer.setStyle(estiloBase);
     
+    // --- EFECTO MOUSEOVER PARA POLÍGONOS ---
     layer.on('mouseover', function(e) {
         var l = e.target;
         l.setStyle({
             fillOpacity: 0.5,
             weight: 3.5,
-            color: "#000000"
+            color: "#000000" // Resalta el borde del polígono en negro
         });
         
         var textoTooltip = feature.properties["provincia"] || feature.properties["nombre"] || "Provincia Petrolera";
@@ -114,13 +114,13 @@ function aplicarEstiloPoligono(feature, layer, nombreCapa) {
     });
     
     layer.on('mouseout', function(e) {
-        e.target.setStyle(estiloBase);
+        e.target.setStyle(estiloBase); // Restablece el color guinda
     });
 
     inyectarPopUp(feature, layer);
 }
 
-// Generar Pop-up con atributos
+// Función auxiliar para rellenar los datos del Pop-up
 function inyectarPopUp(feature, layer) {
     if (feature.properties) {
         var contenido = "<div class='custom-popup'><strong>Detalles del Registro</strong><br><hr>";
@@ -137,24 +137,21 @@ function inyectarPopUp(feature, layer) {
     }
 }
 
-// Descargar datos locales de forma asíncrona y bajo demanda
+// Descargar datos optimizado para puntos y polígonos
 function descargarYMostrarCapa(nombre) {
     if (capasCargadas[nombre]) return; 
     
-    console.log(`Cargando archivo local para: ${nombre}`);
+    console.log(`Descargando datos: ${nombre}`);
     
     fetch(urlsCapas[nombre])
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`No se pudo encontrar el archivo GeoJSON para '${nombre}'`);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             var capaGeoJSON = L.geoJSON(data, {
+                // Si la geometría es un punto, usa círculos
                 pointToLayer: function(feature, latlng) {
                     return crearMarcadorCirculo(feature, latlng, nombre);
                 },
+                // Si la geometría es un polígono, aplica estilos de área
                 onEachFeature: function(feature, layer) {
                     if (feature.geometry && feature.geometry.type !== "Point") {
                         aplicarEstiloPoligono(feature, layer, nombre);
@@ -164,11 +161,11 @@ function descargarYMostrarCapa(nombre) {
             
             gruposCluster[nombre].addLayer(capaGeoJSON);
             capasCargadas[nombre] = true;
-            console.log(`Capa '${nombre}' desplegada con éxito.`);
+            console.log(`Capa '${nombre}' cargada.`);
         })
-        .catch(error => console.error(`Error al cargar la capa '${nombre}':`, error));
+        .catch(error => console.error(`Error en la capa '${nombre}':`, error));
 }
 
-map.on('overlayadd', function(event) {
+window.map.on('overlayadd', function(event) {
     descargarYMostrarCapa(event.name);
 });
