@@ -18,14 +18,14 @@ var paletaColores = {
 };
 
 // URLs de GeoServer WFS GeoJSON
-var urlsCapas = {
-    "Provincias Petroleras": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN:provincias_petroleras&outputFormat=application%2Fjson",
-    "Aguas Profundas": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_aguas_profundas_e&outputFormat=application%2Fjson",
-    "Aguas Someras": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_aguas_someras_e&outputFormat=application%2Fjson",
-    "Zona Burgos": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_burgos_e&outputFormat=application%2Fjson",
-    "Cuencas del Sureste": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_cuencas_del_sureste_e&outputFormat=application%2Fjson",
-    "Tampico - Misantla": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_tampico-misantla_e&outputFormat=application%2Fjson",
-    "Zona Veracruz": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_veracruz_e&outputFormat=application%2Fjson"
+    "Provincias Petroleras": "provincias_petroleras.geojson",
+    "Aguas Profundas": "Zona Aguas Profundas.geojson",
+    "Aguas Someras": "Zona Aguas Someras.geojson",
+    "Zona Burgos": "Zona Burgos.geojson",
+    "Cuencas del Sureste": "Zona Cuencas del Sureste.geojson",
+    "Tampico - Misantla": "Zona Tampico-Misantla.geojson",
+    "Zona Veracruz": "Zona Veracruz.geojson",
+    "Provincias petroleras": "provincias_petroleras.geojson"
 };
 
 var gruposCluster = {}; 
