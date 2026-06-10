@@ -1,0 +1,37 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#map {
+    height: 100vh; 
+    width: 100vw;  
+}
+
+/* Estilo profesional para la ventana flotante de datos */
+.custom-popup {
+    font-size: 12px;
+    line-height: 1.5;
+    max-height: 200px;
+    overflow-y: auto; /* Agrega scroll si los datos son extremadamente largos */
+    min-width: 220px;
+}
+
+.custom-popup hr {
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 6px 0;
+}
+
+/* Mejoras visuales al panel de control de capas */
+.leaflet-control-layers {
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+    border-radius: 8px !important;
+    padding: 10px !important;
+    font-size: 13px;
+}
