@@ -76,6 +76,7 @@ var municipiosLayer = L.geoJSON(null, {
 
 function onEachMunicipio(feature, layer) {
     layer.bindTooltip('<div class="custom-tooltip">' + feature.properties.NOM_MUN + ', ' + feature.properties.NOMGEO + '</div>');
+
     // Efecto de hover
     layer.on('mouseover', function (e) {
         layer.setStyle(highlightStyle);
@@ -84,6 +85,10 @@ function onEachMunicipio(feature, layer) {
         municipiosLayer.resetStyle(layer);
     });
 
+    // Zoom al municipio seleccionado
+    layer.on('click', function (e) {
+        mapas[0].fitBounds(layer.getBounds());
+    });
 }
 
 // Función para cargar los municipios correspondientes a un estado
