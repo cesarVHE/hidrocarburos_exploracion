@@ -23,8 +23,8 @@ var urlsCapas = {
     "Aguas Profundas": "https://raw.githubusercontent.com/cesarVHE/hidrocarburos_exploracion/main/Zona%20Aguas%20Profundas.geojson",
     "Aguas Someras": "https://raw.githubusercontent.com/cesarVHE/hidrocarburos_exploracion/main/Zona%20Aguas%20Someras.geojson",
     "Zona Burgos": "https://raw.githubusercontent.com/cesarVHE/hidrocarburos_exploracion/main/Zona%20Burgos.geojson",
-    "Cuencas del Sureste": "https://raw.githubusercontent.com/cesarVHE/hidrocarburos_exploracion/main/Cuencas%20del%20Sureste.geojson",
-    "Tampico - Misantla": "https://raw.githubusercontent.com/cesarVHE/hidrocarburos_exploracion/main/Tampico%20-%20Misantla.geojson",
+    "Cuencas del Sureste": "https://raw.githubusercontent.com/cesarVHE/hidrocarburos_exploracion/main/Zona%20Cuencas%20del%20Sureste.geojson",
+    "Tampico - Misantla": "https://raw.githubusercontent.com/cesarVHE/hidrocarburos_exploracion/main/Zona%20Tampico-Misantla.geojson",
     "Zona Veracruz": "https://raw.githubusercontent.com/cesarVHE/hidrocarburos_exploracion/main/Zona%20Veracruz.geojson"
 };
 
