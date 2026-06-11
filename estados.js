@@ -1,27 +1,3 @@
-// --- Botón personalizado para centrar el mapa (Home) ---
-// function agregarBotonCentrarMapa() {
-//     if (!window.L || !mapas || !mapas[0]) return;
-//     var homeControl = L.Control.extend({
-//         options: { position: 'topleft' },
-//         onAdd: function (map) {
-//             var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-custom');
-//             container.title = 'Centrar mapa';
-//             container.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="12" x2="16" y2="12"/></svg>';
-//             container.style.cursor = 'pointer';
-//             container.onclick = function () {
-//                 // Ajusta los valores a la vista inicial de tu mapa
-//                 map.setView([23.6345, -102.5528], 5); // México
-//             };
-//             return container;
-//         }
-//     });
-//     mapas[0].addControl(new homeControl());
-// }
-//Campos Visbles de los popup*@
-
-//
-
-
 
 //Busqueda
 var availableTerms = [];//Variable global para almacenar los terminos de búqueda Sugerencia de Terminos
@@ -48,24 +24,16 @@ var iconoBase = L.Icon.extend({
     }
 });
 
-// Asignación de Iconos
-//var iconoSolicitudes = new iconoBase({ iconUrl: 'https://cdn.sassoapps.com/img_snier/vistas/Solicitudes.png' });
-//iconoAprobado = new iconoBase({ iconUrl: 'https://cdn.sassoapps.com/img_snier/vistas/Aprobado.png' });
-//iconoNoaprobado = new iconoBase({ iconUrl: 'https://cdn.sassoapps.com/img_snier/vistas/NoAprobado.png' });
-
-
 var currentMarker = null; // Referencia al marcador actual
 // var seleccionado = 'estado'; // Estado inicial
 var municipiosFiltrados = null;
-
-
 
 //Colores
 var initialStyle = {
     color: '#222', // Color de línea (negro/gris oscuro)
     fillColor: '#222', // Color de relleno (gris oscuro, opacidad baja)
     fillOpacity: 0.01, // Opacidad del relleno
-    weight: 3 // Ancho de la línea
+    weight: 1 // Ancho de la línea
 };
 
 // Estilo para el hover
@@ -73,7 +41,7 @@ var highlightStyle = {
     color: '#555', // Gris medio para hover
     fillColor: '#555', // Gris medio para hover
     fillOpacity: 0.01,
-    weight: 3
+    weight: 1.5
 };
 
 // Se eliminó el marcador de vista de calle al hacer clic en el mapa por solicitud del usuario.
@@ -302,11 +270,7 @@ mapas[0].on('draw:created', function (e) {
 });
 
 
-
-
 //Funciones de los botones y del Mapa*@
-
-
 
 function limpiarMarcadores() {
     // Limpiar todas las capas de marcadores y círculos
@@ -372,8 +336,6 @@ function addClassToPopupIfMedia(content, popup) {
 // --- Control de capas ---
 
 var control = L.control.layers(rasterBaseLayers, null, { collapsed: false, position: 'topright' }).addTo(mapas[0]);
-
-
 
 // --- Funciones para cargar y limpiar marcadores ---
 // --- Validación segura para carga de KML ---
@@ -516,44 +478,53 @@ function limpiarMarcadores() {
     });
 }
 
-// --- Control de opacidad para raster activo ---
-var rasterActivo = rasterBaseLayers["🌞 Potencial Fotovoltaico"];
-
-// Crear el control visual (slider)
+// --- Control de opacidad para capas activas (GeoJSON/clusters) ---
 var opacityControl = L.control({ position: 'topleft' });
 opacityControl.onAdd = function (map) {
     var div = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
     div.style.background = '#fff';
     div.style.padding = '6px 10px 2px 10px';
     div.style.width = '160px';
-    div.innerHTML = '<label style="font-size:12px;">Opacidad raster</label><br><input id="raster-opacity-slider" type="range" min="0" max="1" step="0.01" value="1" style="width:130px;">';
+    div.innerHTML = '<label style="font-size:12px;">Opacidad</label><br><input id="raster-opacity-slider" type="range" min="0" max="1" step="0.01" value="1" style="width:130px;">';
 
-    // Evitar que el mapa se mueva al interactuar con el control
     L.DomEvent.disableClickPropagation(div);
     L.DomEvent.disableScrollPropagation(div);
 
     return div;
 };
-opacityControl.addTo(mapas[0]);
+opacityControl.addTo(window.map);
 
-// Evento para cambiar opacidad
 setTimeout(function () {
     var slider = document.getElementById('raster-opacity-slider');
     if (slider) {
         slider.addEventListener('input', function () {
             var valor = parseFloat(this.value);
 
-            if (!rasterActivo) return;
-
-            if (typeof rasterActivo.setOpacity === 'function') {
-                rasterActivo.setOpacity(valor);
-            } 
-            else if (rasterActivo.eachLayer) {
-                rasterActivo.eachLayer(function (layer) {
-                    if (typeof layer.setOpacity === 'function') {
-                        layer.setOpacity(valor);
-                    }
-                });
+            for (var nombreCapa in gruposCluster) {
+                var grupo = gruposCluster[nombreCapa];
+                if (window.map.hasLayer(grupo)) {
+                    grupo.eachLayer(function (capaGeoJSON) {
+                        if (capaGeoJSON.eachLayer) {
+                            capaGeoJSON.eachLayer(function (layer) {
+                                if (layer.setStyle) {
+                                    // Si es polígono (tiene fillColor con opacidad base 0.3)
+                                    if (layer.feature && layer.feature.geometry && layer.feature.geometry.type !== "Point") {
+                                        layer.setStyle({
+                                            fillOpacity: valor * 0.3,
+                                            opacity: valor * 0.8
+                                        });
+                                    } else {
+                                        // Puntos (circleMarker)
+                                        layer.setStyle({
+                                            fillOpacity: valor * 0.95,
+                                            opacity: valor
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
             }
         });
     }
@@ -569,9 +540,6 @@ function hideAllColorRamps() {
     });
 }
 
-// Cargar capa y marcadores por defecto
-// rasterActivo.addTo(mapas[0]);
-
 // Ocultar todas las rampas al inicio y luego mostrar la por defecto
 hideAllColorRamps();
 var defaultRamp = document.getElementById('simbol-fotovoltaico');
@@ -579,123 +547,6 @@ if (defaultRamp) {
     defaultRamp.style.display = '';
 }
 
-// --- Evento para cambio de capa raster ---
-// mapas[0].on('baselayerchange', function (e) {
-//     // Si es un estilo de mapa y no un raster temático, no limpiar marcadores
-//     const capasTematicas = [
-//         "🌞 Potencial Fotovoltaico",
-//         "☀️ Radiación Horizontal",
-//         "💨 Viento", // puedes usar startsWith más abajo
-//         "🛢️ Residuos Industriales",
-//         "🐄 Residuos Pecuarios",
-//         "🗑️ Residuos Urbanos",
-//         "🌲 Residuos Forestales",
-//         "🌋 Geotérmica",
-//         "💧 Disponibilidad Hídrica"
-//     ];
-
-//     if (!capasTematicas.some(nombre => e.name.startsWith(nombre.replace(/.$/, "")))) {
-//         return; // Es un cambio de estilo base → no tocar marcadores
-//     }
-
-//     limpiarMarcadores();
-    
-//     // Quitar opacidad al raster anterior
-//     if (rasterActivo && typeof rasterActivo.setOpacity === 'function') {
-//         rasterActivo.setOpacity(1);
-//     }
-//     rasterActivo = e.layer;
-//     // Sincronizar slider con la opacidad actual
-//     var slider = document.getElementById('raster-opacity-slider');
-//     if (slider && rasterActivo && typeof rasterActivo.options.opacity !== 'undefined') {
-//         slider.value = rasterActivo.options.opacity;
-//     } else if (slider) {
-//         slider.value = 1;
-//     }
-
-//     // Oculta todas las leyendas y rampas (solo si existen)
-//     var tablas = [
-//         'simbol-fotovoltaico',
-//         'simbol-radiacion',
-//         'simbol-viento'
-//     ];
-//     tablas.forEach(function (id) {
-//         var el = document.getElementById(id);
-//         if (el) el.style.display = 'none';
-//     });
-
-//     // Determina qué leyenda/rampa mostrar (solo si existen)
-//     if (e.name === '🌞 Potencial Fotovoltaico') {
-//         var t = document.getElementById('simbol-fotovoltaico');
-//         if (t) t.style.display = '';
-//         mapas[0].removeControl(lay);
-//         mapas[0].removeControl(layDC);
-//         actualizarPlaceholderBusqueda('PERMISO');
-//     } else if (e.name === '☀️ Radiación Horizontal') {
-//         var t = document.getElementById('simbol-radiacion');
-//         if (t) t.style.display = '';
-//         mapas[0].removeControl(lay);
-//         mapas[0].removeControl(layDC);
-//         actualizarPlaceholderBusqueda('PERMISO');
-//     } else if (e.name && e.name.startsWith('💨 Viento')) {
-//         var t = document.getElementById('simbol-viento');
-//         if (t) t.style.display = '';
-//         mapas[0].removeControl(lay);
-//         mapas[0].removeControl(layDC);
-//         actualizarPlaceholderBusqueda('PERMISO');
-//     } else if (e.name === '🛢️ Residuos Industriales') {
-//         var t = document.getElementById('simbol-biomasa');
-//         if (t) t.style.display = '';
-//         mapas[0].removeControl(layDC);
-//         lay.addTo(mapas[0]);
-//         actualizarPlaceholderBusqueda('SINPERMISO');
-//     } else if (e.name === '🐄 Residuos Pecuarios') {
-//         var t = document.getElementById('simbol-biomasa');
-//         if (t) t.style.display = '';
-//         mapas[0].removeControl(layDC);
-//         lay.addTo(mapas[0]);
-//         actualizarPlaceholderBusqueda('SINPERMISO');
-//     } else if (e.name === '🗑️ Residuos Urbanos') {
-//         var t = document.getElementById('simbol-biomasa');
-//         if (t) t.style.display = '';
-//         mapas[0].removeControl(layDC);
-//         lay.addTo(mapas[0]);
-//         actualizarPlaceholderBusqueda('SINPERMISO');
-//     } else if (e.name === '🌲 Residuos Forestales') {
-//         var t = document.getElementById('simbol-biomasa');
-//         if (t) t.style.display = '';
-//         mapas[0].removeControl(layDC);
-//         lay.addTo(mapas[0]);
-//         actualizarPlaceholderBusqueda('SINPERMISO');
-//     } else if (e.name === '🌋 Geotérmica') {
-//         var t = document.getElementById('simbol-geotermica');
-//         if (t) t.style.display = '';
-//         mapas[0].removeControl(layDC);
-//         lay.addTo(mapas[0]);
-//         actualizarPlaceholderBusqueda('SINPERMISO');
-//     } 
-//     else if (e.name === '💧 Disponibilidad Hídrica'){
-//         var t = document.getElementById('simbol-hidrica');
-//         if (t) t.style.display = '';
-//         mapas[0].removeControl(lay);
-//         layDC.addTo(mapas[0]);
-//         actualizarPlaceholderBusqueda('SINPERMISO');
-//     }
-
-//     // Limpiar input del buscador y términos
-//     var input = document.getElementById("busquedaGeneralInput");
-//     if (input) input.value = "";
-//     availableTerms = [];
-
-//     if (e.name === "🌞 Potencial Fotovoltaico" || e.name === "☀️ Radiación Horizontal") {
-//         cargarMarcadoresFotovoltaico();
-//     } else if (e.name && e.name.startsWith("💨 Viento")) {
-//         cargarMarcadoresViento();
-//     }
-//     // El autocompletado se actualiza dentro de las funciones de carga
-// });
-
-// --- Inicialización del plugin de impresión ---
 // Crear preloader
 const preloader = document.createElement('div');
 preloader.id = 'preloader';
@@ -731,36 +582,37 @@ style.innerHTML = `
 document.head.appendChild(style);
 
 // Inicializar el printer
-const printer = L.easyPrint({
-    tileLayer: null,
-    sizeModes: ['Current', 'A4Portrait', 'A4Landscape'],
-    filename: 'captura_mapa',
-    exportOnly: true,
-    hideControlContainer: true
-}).addTo(mapas[0]);
+// const printer = L.easyPrint({
+//     tileLayer: null,
+//     sizeModes: ['Current', 'A4Portrait', 'A4Landscape'],
+//     filename: 'captura_mapa',
+//     exportOnly: true,
+//     hideControlContainer: true,
+//     customSpinnerClass: 'epLoader'
+// }).addTo(mapas[0]);
 
-const esperarOpcionesImpresion = setInterval(() => {
-    const currentSizeBtn = document.querySelector('.CurrentSize');
-    const a4PortraitBtn = document.querySelector('.A4Portrait');
-    const a4LandscapeBtn = document.querySelector('.A4Landscape');
+// const esperarOpcionesImpresion = setInterval(() => {
+//     const currentSizeBtn = document.querySelector('.CurrentSize');
+//     const a4PortraitBtn = document.querySelector('.A4Portrait');
+//     const a4LandscapeBtn = document.querySelector('.A4Landscape');
 
-    if (currentSizeBtn && a4PortraitBtn && a4LandscapeBtn) {
-        console.log('🎯 Botones de opciones de impresión detectados.');
+//     if (currentSizeBtn && a4PortraitBtn && a4LandscapeBtn) {
+//         console.log('🎯 Botones de opciones de impresión detectados.');
 
-        const mostrarPreloader = () => {
-            console.log('⏳ Mostrando preloader...');
-            document.getElementById('ajax-preloader').style.display = 'flex';
+//         const mostrarPreloader = () => {
+//             console.log('⏳ Mostrando preloader...');
+//             var pre = document.getElementById('preloader'); // <-- corregido
+//             if (pre) pre.style.display = 'flex';
 
-            // Esperamos unos segundos para ocultarlo (ej. 3 segundos)
-            setTimeout(() => {
-                document.getElementById('ajax-preloader').style.display = 'none';
-            }, 3500);
-        };
+//             setTimeout(() => {
+//                 if (pre) pre.style.display = 'none';
+//             }, 3500);
+//         };
 
-        currentSizeBtn.addEventListener('click', mostrarPreloader);
-        a4PortraitBtn.addEventListener('click', mostrarPreloader);
-        a4LandscapeBtn.addEventListener('click', mostrarPreloader);
+//         currentSizeBtn.addEventListener('click', mostrarPreloader);
+//         a4PortraitBtn.addEventListener('click', mostrarPreloader);
+//         a4LandscapeBtn.addEventListener('click', mostrarPreloader);
 
-        clearInterval(esperarOpcionesImpresion); // Ya no es necesario seguir buscando
-    }
-}, 500);
+//         clearInterval(esperarOpcionesImpresion); // Ya no es necesario seguir buscando
+//     }
+// }, 500);

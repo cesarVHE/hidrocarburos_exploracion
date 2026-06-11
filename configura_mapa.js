@@ -57,7 +57,8 @@
                         minZoom: 1,
                         maxZoom: 28,
                         minNativeZoom: 0,
-                        maxNativeZoom: 20
+                        maxNativeZoom: 20,
+                        crossOrigin: true 
                     });
                 
                     var cartoDBDarkAll = L.tileLayer('https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
@@ -104,18 +105,27 @@
                         style: "0198a9f0-f135-7991-aaec-bea71681556e" // aquí puedes usar el ID o estilo que quieras
                     });
 
+                    // Forzar crossOrigin en los tiles internos una vez añadido al mapa
+                    Sener.on('add', function() {
+                        if (Sener._tileLayer) {
+                            Sener._tileLayer.options.crossOrigin = true;
+                        }
+                    });
+
                     const keyLight = 'xRR3xCujdkUjxkDqlNTG';
                     // Capa de MapTiler estilo "toner-v2"
                     var SenerLight = L.maptiler.maptilerLayer({
                         apiKey: keyLight,
-                        style: "0198a9af-dc7c-79d3-8316-a80767ad1d0f" // aquí puedes usar el ID o estilo que quieras
+                        style: "0198a9af-dc7c-79d3-8316-a80767ad1d0f", // aquí puedes usar el ID o estilo que quieras
+                        crossOrigin: 'anonymous' // Asegura que las solicitudes sean CORS
                     });
 
                     const keyDark = 'xRR3xCujdkUjxkDqlNTG';
                     // Capa de MapTiler estilo "toner-v2"
                     var SenerDark = L.maptiler.maptilerLayer({
                         apiKey: keyDark,
-                        style: "0198a9df-c3dc-73df-b1c0-55a5488e3790" // aquí puedes usar el ID o estilo que quieras
+                        style: "0198a9df-c3dc-73df-b1c0-55a5488e3790", // aquí puedes usar el ID o estilo que quieras
+                        crossOrigin: 'anonymous' // Asegura que las solicitudes sean CORS
                     });
 
                     // Configura los Base Layers y expónlos globalmente
@@ -151,9 +161,10 @@
                 
                     var resetZoomControl = L.control({ position: 'topleft' });
                     resetZoomControl.onAdd = function (map) {
-                        var div = L.DomUtil.create('div', 'leaflet-control-custom');
-                        div.innerHTML = '<button class="btn"><i class="bi bi-house-door"></i></button>';
-                        div.firstChild.onclick = function() {
+                        var div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+                        div.innerHTML = '<a class="btn" href="#" title="Centrar mapa" role="button" aria-label="Centrar mapa"><i class="bi bi-house-door"></i></a>';
+                        div.firstChild.onclick = function(e) {
+                            e.preventDefault();
                             resetZoom(map);
                         };
                         return div;

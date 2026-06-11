@@ -35,3 +35,13 @@ body, html {
     padding: 10px !important;
     font-size: 13px;
 }
+
+.leaflet-control-custom a.btn {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

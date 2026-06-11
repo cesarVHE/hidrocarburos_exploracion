@@ -19,13 +19,13 @@ var paletaColores = {
 
 // URLs de GeoServer WFS GeoJSON
 var urlsCapas = {
-    "Provincias Petroleras": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN:provincias_petroleras&outputFormat=application%2Fjson",
-    "Aguas Profundas": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_aguas_profundas_e&outputFormat=application%2Fjson",
-    "Aguas Someras": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_aguas_someras_e&outputFormat=application%2Fjson",
-    "Zona Burgos": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_burgos_e&outputFormat=application%2Fjson",
-    "Cuencas del Sureste": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_cuencas_del_sureste_e&outputFormat=application%2Fjson",
-    "Tampico - Misantla": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_tampico-misantla_e&outputFormat=application%2Fjson",
-    "Zona Veracruz": "http://localhost:8080/geoserver/proyecto_SNIEN/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=proyecto_SNIEN%3Azona_veracruz_e&outputFormat=application%2Fjson"
+    "Provincias Petroleras": "https://raw.githubusercontent.com/cesarVHE/hidrocarburos_exploracion/main/provincias_petroleras.geojson",
+    "Aguas Profundas": "https://raw.githubusercontent.com/cesarVHE/hidrocarburos_exploracion/main/Zona%20Aguas%20Profundas.geojson",
+    "Aguas Someras": "https://raw.githubusercontent.com/cesarVHE/hidrocarburos_exploracion/main/Zona%20Aguas%20Someras.geojson",
+    "Zona Burgos": "https://raw.githubusercontent.com/cesarVHE/hidrocarburos_exploracion/main/Zona%20Burgos.geojson",
+    "Cuencas del Sureste": "https://raw.githubusercontent.com/cesarVHE/hidrocarburos_exploracion/main/Cuencas%20del%20Sureste.geojson",
+    "Tampico - Misantla": "https://raw.githubusercontent.com/cesarVHE/hidrocarburos_exploracion/main/Tampico%20-%20Misantla.geojson",
+    "Zona Veracruz": "https://raw.githubusercontent.com/cesarVHE/hidrocarburos_exploracion/main/Zona%20Veracruz.geojson"
 };
 
 var gruposCluster = {}; 
@@ -36,22 +36,28 @@ var capasCargadas = {};
 // Inicializar contenedores de cluster vacíos
 for (var nombreCapa in urlsCapas) {
     if (urlsCapas.hasOwnProperty(nombreCapa)) {
-        (function(colorCapaActual) {
-            gruposCluster[nombreCapa] = L.markerClusterGroup({
-                chunkedLoading: true,
-                spiderfyOnMaxZoom: true,
-                showCoverageOnHover: false,
-                iconCreateFunction: function(cluster) {
-                    var totalPuntos = cluster.getChildCount();
-                    return L.divIcon({
-                        html: `<div style="background-color: ${colorCapaActual}cc; color: white; border: 2px solid #ffffff; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 3px 6px rgba(0,0,0,0.3); font-size: 11px;"><span>${totalPuntos}</span></div>`,
-                        className: 'marker-cluster-custom',
-                        iconSize: L.point(36, 36)
-                    });
-                }
-            });
-        })(paletaColores[nombreCapa]);
-        
+
+        if (nombreCapa === "Provincias Petroleras") {
+            // Polígonos: capa normal, sin cluster
+            gruposCluster[nombreCapa] = L.layerGroup();
+        } else {
+            (function(colorCapaActual) {
+                gruposCluster[nombreCapa] = L.markerClusterGroup({
+                    chunkedLoading: true,
+                    spiderfyOnMaxZoom: true,
+                    showCoverageOnHover: false,
+                    iconCreateFunction: function(cluster) {
+                        var totalPuntos = cluster.getChildCount();
+                        return L.divIcon({
+                            html: `<div style="background-color: ${colorCapaActual}cc; color: white; border: 2px solid #ffffff; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 3px 6px rgba(0,0,0,0.3); font-size: 11px;"><span>${totalPuntos}</span></div>`,
+                            className: 'marker-cluster-custom',
+                            iconSize: L.point(36, 36)
+                        });
+                    }
+                });
+            })(paletaColores[nombreCapa]);
+        }
+
         window.controlCapas.addOverlay(gruposCluster[nombreCapa], nombreCapa);
         capasCargadas[nombreCapa] = false;
     }
